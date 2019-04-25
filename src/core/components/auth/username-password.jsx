@@ -28,41 +28,35 @@ export default class UsernamePassword extends React.Component {
         })
       })
         .then(response => response.json())
-        .then(
-          json => {
-            try {
-              if (json.error) {
-                this.setState({ errorMessage: json.error.description });
-              } else {
-                document.getElementById("input-key").value = `bearer ${
-                  json.login.userToken
-                }`;
-                let { authActions } = this.props;
-                authActions.authorize({
-                  jwt: {
-                    name: "jwt",
-                    schema: {
-                      type: "apiKey",
-                      description:
-                        'Authentication JWT. <br> Sample: bearer "userToken" <br> Get userToken in api POST /login. <p>',
-                      in: "header",
-                      name: "Authorization"
-                    },
-                    value: document.getElementById("input-key").value
-                  }
-                });
-                this.setState({ errorMessage: "" });
+        .then(json => {
+          if (!!json.error) {
+            this.setState({ errorMessage: json.error.description });
+            console.log(json);
+          } else {
+            document.getElementById("input-key").value = `bearer ${
+              json.login.userToken
+            }`;
+            let { authActions } = this.props;
+            authActions.authorize({
+              jwt: {
+                name: "jwt",
+                schema: {
+                  type: "apiKey",
+                  description:
+                    'Authentication JWT. <br> Sample: bearer "userToken" <br> Get userToken in api POST /login. <p>',
+                  in: "header",
+                  name: "Authorization"
+                },
+                value: document.getElementById("input-key").value
               }
-            } catch (error) {
-              console.log(error);
-              this.setState({ errorMessage: "An error has occurred!" });
-            }
-          },
-          error => {
-            console.log(error);
-            this.setState({ errorMessage: "An error has occurred!" });
+            });
+            this.setState({ errorMessage: "" });
           }
-        );
+        })
+        .catch(error => {
+          this.setState({ errorMessage: error.message });
+          console.log(error);
+        });
     }
   };
 
